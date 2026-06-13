@@ -56,7 +56,7 @@ const FAQ_DATA = [
   },
   {
     q: 'Какой клиент установить?',
-    a: 'iOS — Karing, Happ или Streisand. Android — Karing или Hiddify. Windows / macOS — Hiddify. Добавь подписку через «Импорт из буфера».',
+    a: 'Подходит почти любой: Happ, v2rayNG, NekoBox, Streisand (iOS), FlClash/KoalaClash (Clash), Hiddify, Karing, sing-box. Ключ один — формат подберётся под клиент автоматически. Добавляй через «Импорт из буфера».',
   },
   {
     q: 'Сколько устройств можно подключить?',
@@ -73,7 +73,7 @@ const FAQ_DATA = [
 ];
 
 const HOW_STEPS = [
-  { n: '01', t: 'Установите клиент', d: 'Karing · Happ · Hiddify · Streisand' },
+  { n: '01', t: 'Установите клиент', d: 'Happ · v2rayNG · NekoBox · FlClash · Hiddify · Karing' },
   { n: '02', t: 'Скопируйте ключ', d: 'Одно нажатие — ссылка в буфере' },
   { n: '03', t: 'Импорт и подключение', d: '«Добавить подписку из буфера» в клиенте' },
 ];

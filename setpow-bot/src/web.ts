@@ -12,7 +12,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { env } from './config';
 import { db } from './db';
-import { buildSingboxConfig } from './subscription';
+import { buildSubscription, type SubFormat } from './subscription';
 import { onPaymentSuccess } from './bot';
 import { createTmaRouter } from './tma/router';
 
@@ -27,6 +27,9 @@ declare module 'express-serve-static-core' {
 
 export function createWebServer() {
   const app = express();
+  // За reverse-proxy (Caddy/nginx): доверяем X-Forwarded-* — тогда
+  // req.hostname = реальный хост (sub.cryox.me), а не локалхост апстрима.
+  app.set('trust proxy', 1);
   app.use(
     express.json({
       limit: '512kb',
@@ -89,28 +92,10 @@ export function createWebServer() {
   }
 
   // ── /sub/<token> ──────────────────────────────────────────
-  app.get('/sub/:token', async (req: Request, res: Response) => {
-    try {
-      const user = await db.user.findUnique({
-        where: { subAggregatorToken: req.params.token },
-      });
-      if (!user || user.banned) {
-        return res.status(404).type('text/plain').send('Not found');
-      }
-      const format = (req.query.format || 'singbox').toString();
-      // Пока только singbox. Clash/v2ray добавим, если будет нужно.
-      if (format !== 'singbox') {
-        return res.status(400).type('text/plain').send('Only format=singbox supported');
-      }
-      const json = await buildSingboxConfig(user.id);
-      res.setHeader('Cache-Control', 'no-store');
-      res.setHeader('Profile-Title', `Cryox-${user.tgId}`);
-      res.type('application/json').send(json);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('[/sub]', e);
-      res.status(500).type('text/plain').send('Internal error');
-    }
+  // Внутренний путь. Reverse-proxy для sub.cryox.me переписывает чистый
+  // /<token> сюда. Формат определяется по User-Agent (см. serveSubscription).
+  app.get('/sub/:token', (req: Request, res: Response) => {
+    void serveSubscription(req.params.token, req, res);
   });
 
   // ── Webhook YooKassa ──────────────────────────────────────
@@ -278,7 +263,70 @@ export function createWebServer() {
     );
   });
 
+  // ── sub.cryox.me/<token> (чистый путь без /sub/) ──────────
+  // Резерв на случай, если reverse-proxy НЕ переписывает путь, а просто
+  // проксирует sub-домен. Срабатывает ТОЛЬКО на хосте из SUB_BASE_URL,
+  // чтобы не перехватывать произвольные пути на основном домене.
+  const subHost = (() => {
+    if (!env.SUB_BASE_URL) return '';
+    try {
+      return new URL(env.SUB_BASE_URL).hostname;
+    } catch {
+      return '';
+    }
+  })();
+  if (subHost) {
+    app.get('/:token', (req: Request, res: Response, next: NextFunction) => {
+      if (req.hostname === subHost) {
+        void serveSubscription(req.params.token, req, res);
+        return;
+      }
+      next();
+    });
+  }
+
   return app;
+}
+
+/** Формат подписки: ?format= (override) или авто по User-Agent клиента. */
+function pickFormat(req: Request): SubFormat {
+  const q = typeof req.query.format === 'string' ? req.query.format.toLowerCase() : '';
+  if (q === 'clash' || q === 'mihomo' || q === 'meta') return 'clash';
+  if (q === 'v2ray' || q === 'base64' || q === 'v2rayn') return 'v2ray';
+  if (q === 'singbox' || q === 'sing-box' || q === 'json') return 'singbox';
+
+  const ua = (req.header('user-agent') || '').toLowerCase();
+  if (/clash|mihomo|meta|flclash|koala|stash|verge/.test(ua)) return 'clash';
+  if (/sing-box|sfa|sfi|sfm|karing|hiddify|happ/.test(ua)) return 'singbox';
+  // v2rayNG / NekoBox / Streisand / Shadowrocket / v2box / неизвестные.
+  return 'v2ray';
+}
+
+/** Найти юзера по токену и отдать подписку в подходящем формате. */
+async function serveSubscription(token: string, req: Request, res: Response): Promise<void> {
+  try {
+    const user = await db.user.findUnique({ where: { subAggregatorToken: token } });
+    if (!user || user.banned) {
+      res.status(404).type('text/plain').send('Not found');
+      return;
+    }
+    const format = pickFormat(req);
+    const { body, contentType, expiresAt } = await buildSubscription(user.id, format);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Profile-Title', 'Cryox');
+    res.setHeader('Profile-Update-Interval', '12');
+    if (expiresAt) {
+      // expire — unix-секунды; клиент покажет «осталось N дней». Трафик не
+      // лимитируем → total/upload/download = 0.
+      const ts = Math.floor(expiresAt.getTime() / 1000);
+      res.setHeader('Subscription-Userinfo', `upload=0; download=0; total=0; expire=${ts}`);
+    }
+    res.type(contentType).send(body);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('[/sub]', e);
+    res.status(500).type('text/plain').send('Internal error');
+  }
 }
 
 function basicAuthMiddleware(req: Request, res: Response, next: NextFunction) {

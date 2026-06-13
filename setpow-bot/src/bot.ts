@@ -12,7 +12,7 @@ import { env, isAdmin, paymentsAvailable } from './config';
 import { db } from './db';
 import { PLANS, PLAN_ORDER, type PlanId, formatRub } from './plans';
 import { createInvoice, markPaid, type PaymentProvider } from './payments';
-import { grantOrExtend, activeForUser, revokeAll } from './subscription';
+import { grantOrExtend, activeForUser, revokeAll, subscriptionUrl, genSubToken } from './subscription';
 import { createRateLimiter } from './rateLimit';
 import * as notify from './notify';
 import { fmtDate, pluralDays } from './notify';
@@ -156,7 +156,8 @@ function genRefCode(): string {
   return crypto.randomBytes(6).toString('base64url');
 }
 function genAggregatorToken(): string {
-  return crypto.randomBytes(18).toString('base64url');
+  // 16 символов base62 — короткий «чистый» токен для sub.cryox.me/<token>.
+  return genSubToken();
 }
 
 /**
@@ -854,7 +855,7 @@ bot.callbackQuery('menu:keys', async (ctx) => {
   if (!user) return ctx.answerCallbackQuery('Запусти /start заново.');
 
   const subs = await activeForUser(user.id);
-  const subUrl = `${env.PUBLIC_URL.replace(/\/$/, '')}/sub/${user.subAggregatorToken}?format=singbox`;
+  const subUrl = subscriptionUrl(user.subAggregatorToken);
 
   let text: string;
   if (subs.length === 0) {
@@ -873,7 +874,7 @@ bot.callbackQuery('menu:keys', async (ctx) => {
     lines.push('🌐 *Универсальная подписка* (одна для всех протоколов и серверов):');
     lines.push('`' + subUrl + '`');
     lines.push('');
-    lines.push('Импортируй в Karing / Happ / Hiddify / sing-box.');
+    lines.push('Один ключ — любой клиент: Happ · v2rayNG · NekoBox · Karing · Hiddify · sing-box · FlClash · KoalaClash · Clash Meta. Формат подберётся автоматически.');
     text = lines.join('\n');
   }
 

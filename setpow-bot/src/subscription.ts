@@ -11,7 +11,29 @@
 import crypto from 'node:crypto';
 import type { Subscription, User, Server, Prisma } from '@prisma/client';
 import { db } from './db';
+import { env } from './config';
 import { panel, type Kind } from './panel';
+
+/** 16 символов base62 — короткий «чистый» токен в стиле sub.cryox.me/<token>. */
+export function genSubToken(len = 16): string {
+  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const bytes = crypto.randomBytes(len);
+  let out = '';
+  for (let i = 0; i < len; i++) out += alphabet[bytes[i] % 62];
+  return out;
+}
+
+/**
+ * Публичная ссылка-подписка для юзера.
+ *   • SUB_BASE_URL задан → https://sub.cryox.me/<token> (чистый путь;
+ *     reverse-proxy переписывает на внутренний /sub/<token>).
+ *   • не задан → ${PUBLIC_URL}/sub/<token> (обратная совместимость).
+ * Формат больше не указываем в query — он определяется по User-Agent клиента.
+ */
+export function subscriptionUrl(token: string): string {
+  const root = (env.SUB_BASE_URL || env.PUBLIC_URL).replace(/\/$/, '');
+  return env.SUB_BASE_URL ? `${root}/${token}` : `${root}/sub/${token}`;
+}
 
 function addDaysIso(base: Date | null | undefined, days: number): Date {
   // Если у юзера ещё активна подписка — продлеваем от текущего expiresAt.
@@ -211,23 +233,46 @@ async function getServerInfoCached(server: Server): Promise<ServerInfo> {
   return fresh;
 }
 
-/**
- * Сгенерировать sing-box JSON для всех активных подписок юзера.
- * Возвращает строку (JSON-форматированную). Для clash/plain — отдельные
- * билдеры будут добавлены при необходимости (Karing/Happ умеют sing-box,
- * этого достаточно для MVP).
- */
-export async function buildSingboxConfig(userId: number): Promise<string> {
+// ─────────────────────────────────────────────────────────────
+// Нормализованные узлы. Все форматы (sing-box/clash/v2ray) строятся из
+// ОДНОГО списка Node — данные одинаковы, меняется только сериализация.
+// ─────────────────────────────────────────────────────────────
+
+export type SubFormat = 'singbox' | 'clash' | 'v2ray';
+
+interface Hy2Node {
+  kind: 'hy2';
+  tag: string;
+  server: string;
+  port: number;
+  /** auth-строка hysteria2: "<login>:<password>". */
+  auth: string;
+  obfsPassword?: string;
+  sni: string;
+}
+interface RealityNode {
+  kind: 'reality';
+  tag: string;
+  server: string;
+  port: number;
+  uuid: string;
+  flow: string;
+  sni: string;
+  publicKey: string;
+  shortId: string;
+  fingerprint: string;
+}
+type Node = Hy2Node | RealityNode;
+
+/** Собрать узлы по всем активным подпискам юзера (+ максимальная дата окончания). */
+async function collectNodes(userId: number): Promise<{ nodes: Node[]; expiresAt: Date | null }> {
   const subs = await activeForUser(userId);
-  if (subs.length === 0) {
-    return JSON.stringify({ outbounds: [], note: 'No active subscriptions' }, null, 2);
-  }
+  const nodes: Node[] = [];
+  let expiresAt: Date | null = null;
 
-  const outbounds: Record<string, unknown>[] = [];
-
-  // Группируем по серверу чтобы один раз получить serverInfo.
   const byServerId = new Map<number, typeof subs>();
   for (const s of subs) {
+    if (!expiresAt || s.expiresAt > expiresAt) expiresAt = s.expiresAt;
     const list = byServerId.get(s.serverId) ?? [];
     list.push(s);
     byServerId.set(s.serverId, list);
@@ -237,46 +282,65 @@ export async function buildSingboxConfig(userId: number): Promise<string> {
     const server = group[0].server;
     const info = await getServerInfoCached(server);
     const tagPrefix = server.displayName;
-
     for (const sub of group) {
       if (sub.kind === 'hy2' && info.hy2.enabled) {
-        outbounds.push({
-          type: 'hysteria2',
+        nodes.push({
+          kind: 'hy2',
           tag: `${tagPrefix} · Hy2`,
           server: info.domain,
-          server_port: info.hy2.port,
-          // username/password идут как `auth` в hysteria2-outbound sing-box
-          password: `${sub.panelUserKey}:${sub.password ?? ''}`,
-          ...(info.hy2.obfsPassword
-            ? { obfs: { type: 'salamander', password: info.hy2.obfsPassword } }
-            : {}),
-          tls: { enabled: true, server_name: info.domain },
+          port: info.hy2.port,
+          auth: `${sub.panelUserKey}:${sub.password ?? ''}`,
+          obfsPassword: info.hy2.obfsPassword,
+          sni: info.domain,
         });
       } else if (sub.kind === 'reality' && info.reality.enabled) {
-        outbounds.push({
-          type: 'vless',
+        nodes.push({
+          kind: 'reality',
           tag: `${tagPrefix} · Reality`,
           server: info.domain,
-          server_port: info.reality.port,
-          uuid: sub.uuid,
+          port: info.reality.port,
+          uuid: sub.uuid ?? '',
           flow: info.reality.flow || '',
-          tls: {
-            enabled: true,
-            server_name: info.reality.sni,
-            utls: { enabled: true, fingerprint: 'chrome' },
-            reality: {
-              enabled: true,
-              public_key: info.reality.publicKey,
-              short_id: info.reality.shortIds[0] ?? '',
-            },
-          },
-          packet_encoding: 'xudp',
+          sni: info.reality.sni,
+          publicKey: info.reality.publicKey,
+          shortId: info.reality.shortIds[0] ?? '',
+          fingerprint: 'chrome',
         });
       }
     }
   }
+  return { nodes, expiresAt };
+}
 
-  // Минимальный playable конфиг для sing-box: outbounds + один selector.
+// ── sing-box JSON (sing-box / Karing / Hiddify / Happ) ────────
+function renderSingbox(nodes: Node[]): string {
+  const outbounds: Record<string, unknown>[] = nodes.map((n) =>
+    n.kind === 'hy2'
+      ? {
+          type: 'hysteria2',
+          tag: n.tag,
+          server: n.server,
+          server_port: n.port,
+          password: n.auth,
+          ...(n.obfsPassword ? { obfs: { type: 'salamander', password: n.obfsPassword } } : {}),
+          tls: { enabled: true, server_name: n.sni },
+        }
+      : {
+          type: 'vless',
+          tag: n.tag,
+          server: n.server,
+          server_port: n.port,
+          uuid: n.uuid,
+          flow: n.flow,
+          tls: {
+            enabled: true,
+            server_name: n.sni,
+            utls: { enabled: true, fingerprint: n.fingerprint },
+            reality: { enabled: true, public_key: n.publicKey, short_id: n.shortId },
+          },
+          packet_encoding: 'xudp',
+        },
+  );
   const tags = outbounds.map((o) => o.tag as string);
   const config = {
     log: { level: 'warn' },
@@ -287,15 +351,112 @@ export async function buildSingboxConfig(userId: number): Promise<string> {
       ...outbounds,
       { type: 'direct', tag: 'direct' },
     ],
-    route: {
-      rules: [
-        { protocol: 'dns', outbound: 'dns-out' },
-        { ip_is_private: true, outbound: 'direct' },
-      ],
-      final: 'proxy',
-    },
+    route: { rules: [{ ip_is_private: true, outbound: 'direct' }], final: 'proxy' },
   };
   return JSON.stringify(config, null, 2);
+}
+
+// ── v2ray base64 (v2rayNG / NekoBox / Streisand / Shadowrocket / Happ) ──
+function nodeToUri(n: Node): string {
+  if (n.kind === 'hy2') {
+    const p = new URLSearchParams({ sni: n.sni });
+    if (n.obfsPassword) {
+      p.set('obfs', 'salamander');
+      p.set('obfs-password', n.obfsPassword);
+    }
+    return `hysteria2://${encodeURIComponent(n.auth)}@${n.server}:${n.port}/?${p.toString()}#${encodeURIComponent(n.tag)}`;
+  }
+  const p = new URLSearchParams({
+    type: 'tcp',
+    security: 'reality',
+    encryption: 'none',
+    pbk: n.publicKey,
+    fp: n.fingerprint,
+    sni: n.sni,
+  });
+  if (n.shortId) p.set('sid', n.shortId);
+  if (n.flow) p.set('flow', n.flow);
+  return `vless://${n.uuid}@${n.server}:${n.port}?${p.toString()}#${encodeURIComponent(n.tag)}`;
+}
+function renderV2ray(nodes: Node[]): string {
+  return Buffer.from(nodes.map(nodeToUri).join('\n'), 'utf8').toString('base64');
+}
+
+// ── Clash Meta / Mihomo YAML (FlClash / KoalaClash / Clash Meta / Stash) ──
+function yamlStr(s: string): string {
+  return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+}
+function nodeToClash(n: Node): string {
+  if (n.kind === 'hy2') {
+    const parts = [
+      `name: ${yamlStr(n.tag)}`,
+      'type: hysteria2',
+      `server: ${n.server}`,
+      `port: ${n.port}`,
+      `password: ${yamlStr(n.auth)}`,
+      `sni: ${yamlStr(n.sni)}`,
+      'skip-cert-verify: false',
+    ];
+    if (n.obfsPassword) parts.push('obfs: salamander', `obfs-password: ${yamlStr(n.obfsPassword)}`);
+    return `  - {${parts.join(', ')}}`;
+  }
+  const parts = [
+    `name: ${yamlStr(n.tag)}`,
+    'type: vless',
+    `server: ${n.server}`,
+    `port: ${n.port}`,
+    `uuid: ${yamlStr(n.uuid)}`,
+    'network: tcp',
+    'udp: true',
+    'tls: true',
+    `servername: ${yamlStr(n.sni)}`,
+    `reality-opts: {public-key: ${yamlStr(n.publicKey)}, short-id: ${yamlStr(n.shortId)}}`,
+    `client-fingerprint: ${n.fingerprint}`,
+  ];
+  if (n.flow) parts.push(`flow: ${n.flow}`);
+  return `  - {${parts.join(', ')}}`;
+}
+function renderClash(nodes: Node[]): string {
+  const head = ['mixed-port: 7890', 'allow-lan: false', 'mode: rule', 'log-level: warn'];
+  if (nodes.length === 0) {
+    return [
+      ...head,
+      'proxies: []',
+      'proxy-groups:',
+      '  - {name: PROXY, type: select, proxies: [DIRECT]}',
+      'rules:',
+      '  - MATCH,PROXY',
+    ].join('\n');
+  }
+  const names = nodes.map((n) => yamlStr(n.tag)).join(', ');
+  return [
+    ...head,
+    'proxies:',
+    nodes.map(nodeToClash).join('\n'),
+    'proxy-groups:',
+    `  - {name: PROXY, type: select, proxies: [auto, ${names}]}`,
+    `  - {name: auto, type: url-test, url: "https://www.gstatic.com/generate_204", interval: 300, proxies: [${names}]}`,
+    'rules:',
+    '  - MATCH,PROXY',
+  ].join('\n');
+}
+
+/**
+ * Построить подписку в нужном формате. Возвращает тело, Content-Type и
+ * максимальную дату окончания (для заголовка Subscription-Userinfo).
+ */
+export async function buildSubscription(
+  userId: number,
+  format: SubFormat,
+): Promise<{ body: string; contentType: string; expiresAt: Date | null }> {
+  const { nodes, expiresAt } = await collectNodes(userId);
+  if (format === 'clash') {
+    return { body: renderClash(nodes), contentType: 'text/yaml; charset=utf-8', expiresAt };
+  }
+  if (format === 'v2ray') {
+    return { body: renderV2ray(nodes), contentType: 'text/plain; charset=utf-8', expiresAt };
+  }
+  return { body: renderSingbox(nodes), contentType: 'application/json; charset=utf-8', expiresAt };
 }
 
 export type { ServerInfo };

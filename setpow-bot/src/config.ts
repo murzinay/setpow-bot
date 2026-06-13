@@ -27,6 +27,12 @@ const envSchema = z.object({
   PUBLIC_URL: z.string().url(),
   HTTP_PORT: z.coerce.number().int().positive().default(8080),
 
+  // Отдельный домен для ссылок-подписок: https://sub.cryox.me
+  // Если задан — ссылка отдаётся «чистой» (sub.cryox.me/<token>, без
+  // /sub/ и без ?format), а reverse-proxy переписывает путь на внутренний
+  // /sub/<token>. Пусто → обратная совместимость: ${PUBLIC_URL}/sub/<token>.
+  SUB_BASE_URL: z.string().optional().default(''),
+
   DATABASE_URL: z.string().min(1),
 
   PANEL_URL: z.string().url(),

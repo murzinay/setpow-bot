@@ -16,13 +16,13 @@
  *   POST /pay/create   — создать инвойс (Telegram Stars / CryptoBot)
  *   POST /key/rotate   — перевыпустить ссылку-подписку (старая отзывается)
  */
-import crypto from 'node:crypto';
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { env, paymentsAvailable } from '../config';
 import { db } from '../db';
 import { bot } from '../bot';
 import { createInvoice } from '../payments';
 import { redeemPromoCode } from '../promo';
+import { subscriptionUrl, genSubToken } from '../subscription';
 import { PLANS, PLAN_ORDER, formatRub, type PlanId } from '../plans';
 import { verifyInitData, type TmaUser, InitDataInvalid } from './auth';
 
@@ -61,11 +61,6 @@ async function getBotUsername(): Promise<string> {
   const me = await bot.api.getMe();
   cachedBotUsername = me.username;
   return cachedBotUsername;
-}
-
-/** Ссылка-подписка (один универсальный URL для всех протоколов/серверов). */
-function keyUrlFor(token: string): string {
-  return `${env.PUBLIC_URL.replace(/\/$/, '')}/sub/${token}?format=singbox`;
 }
 
 /** Статический блок конфигурации для фронта (бренд, ссылки, тарифы). */
@@ -159,7 +154,7 @@ export function createTmaRouter(): Router {
         expiresAt: longestSub ? longestSub.expiresAt.toISOString() : null,
         count: activeCount,
       },
-      keyUrl: keyUrlFor(user.subAggregatorToken),
+      keyUrl: subscriptionUrl(user.subAggregatorToken),
       referral: {
         code: user.refCode,
         link: `https://t.me/${botUsername}?start=ref_${user.refCode}`,
@@ -280,13 +275,13 @@ export function createTmaRouter(): Router {
       res.status(403).json({ error: 'banned' });
       return;
     }
-    // 18 байт ≈ 144 бита энтропии — как в genAggregatorToken (bot.ts).
-    const newToken = crypto.randomBytes(18).toString('base64url');
+    // Короткий base62-токен — как при регистрации (genAggregatorToken).
+    const newToken = genSubToken();
     await db.user.update({
       where: { id: user.id },
       data: { subAggregatorToken: newToken },
     });
-    res.json({ ok: true, keyUrl: keyUrlFor(newToken) });
+    res.json({ ok: true, keyUrl: subscriptionUrl(newToken) });
   });
 
   return r;
