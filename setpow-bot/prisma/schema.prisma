@@ -1,0 +1,183 @@
+// setpow-bot DB
+// SQLite на старте — одной командой меняется на Postgres.
+// Все денежные суммы храним в МИНИМАЛЬНЫХ ЕДИНИЦАХ (копейки/центы/звёзды),
+// чтобы не словить float-проблем.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Telegram-юзер бота
+// ─────────────────────────────────────────────────────────────
+model User {
+  id            Int       @id @default(autoincrement())
+  // BigInt: telegram id может быть > 2^31, у новых аккаунтов уже 10-значный.
+  tgId          BigInt    @unique
+  username      String?
+  firstName     String?
+  // Используется для реф-ссылки https://t.me/bot?start=ref_<refCode>.
+  refCode       String    @unique
+  // Кто пригласил этого юзера. NULL если пришёл сам.
+  referredById  Int?
+  referredBy    User?     @relation("Referrals", fields: [referredById], references: [id])
+  invitees      User[]    @relation("Referrals")
+  // Был ли уже использован триал. Триал даётся ОДИН РАЗ за tgId.
+  trialUsed     Boolean   @default(false)
+  // Был ли отправлен один раз "пинок" с persistent ReplyKeyboard.
+  // Без флага юзер получал бы доп. сообщение "👇 Меню снизу" при
+  // КАЖДОМ /start — это засоряет чат. С флагом — ровно один раз
+  // за всё время существования юзера в БД.
+  replyKbInstalled Boolean @default(false)
+  // Бан флаг — забаненные юзеры не получают новых ключей и игнорятся.
+  banned        Boolean   @default(false)
+  // Токен для агрегатора подписок: https://bot/sub/<subAggregatorToken>.
+  // Один на юзера, не меняется при покупках. Можно перевыпустить вручную.
+  subAggregatorToken String @unique
+  createdAt     DateTime  @default(now())
+
+  subscriptions Subscription[]
+  payments      Payment[]
+  promoRedemptions PromoCodeRedemption[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// VPN-сервер. На старте 1 запись, но архитектура multi-server.
+// ─────────────────────────────────────────────────────────────
+model Server {
+  id          Int      @id @default(autoincrement())
+  // Отображаемое имя для юзера: "🇫🇮 Финляндия".
+  displayName String
+  // Базовый URL панели — https://panel.example.com (без слеша).
+  panelUrl    String
+  // X-API-Key для /api/internal/* этой панели.
+  apiKey      String
+  active      Boolean  @default(true)
+  // Какие протоколы доступны на сервере: CSV: "hy2,reality".
+  protocols   String   @default("hy2,reality")
+  // Кэш глобальных server-info (publicKey, sni, dest, obfsPassword, ...).
+  // Обновляется периодически. JSON-строка.
+  infoCache   String?
+  infoCachedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  subscriptions Subscription[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// Подписка = аккаунт юзера на конкретном сервере конкретного протокола.
+// Один Telegram-юзер может иметь несколько (разные серверы, разные kind).
+// ─────────────────────────────────────────────────────────────
+model Subscription {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  serverId    Int
+  server      Server   @relation(fields: [serverId], references: [id])
+  // "hy2" | "reality"
+  kind        String
+  // Логин на панели:
+  //   hy2     → username (используется как login и в URL)
+  //   reality → name (ключ в realityUsers)
+  panelUserKey String
+  // Hy2: пароль; Reality: NULL.
+  password    String?
+  // Reality: UUID; Hy2: NULL.
+  uuid        String?
+  // subToken на стороне ПАНЕЛИ — не путать с subAggregatorToken юзера.
+  // Используется только если бот хочет проксировать /sub/<token> панели,
+  // обычно бот строит подписку сам, но токен храним для отладки.
+  panelSubToken String
+  expiresAt   DateTime
+  // active | expired | revoked | trial
+  status      String   @default("active")
+  isTrial     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([expiresAt])
+  @@index([userId, status])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Платёж. Один платёж = одна транзакция в платёжке.
+// При status=paid создаём/продлеваем Subscription (см. subscription.ts).
+// ─────────────────────────────────────────────────────────────
+model Payment {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  // "yookassa" | "tg_stars" | "oxapay" | "manual" | "trial"
+  provider    String
+  // ID транзакции в платёжке. Уникален в рамках провайдера.
+  externalId  String?
+  // Минимальные единицы: копейки / звёзды / минимальная единица крипты.
+  amount      Int
+  // "RUB" | "XTR" | "USDT" | "TON"
+  currency    String
+  // Сколько дней даём за этот платёж (30, 90, 180, 365 или 7 за реферал и т.д.)
+  planDays    Int
+  // pending | paid | failed | expired
+  status      String   @default("pending")
+  // Для рефералки: помечаем что бонус уже начислен рефереру.
+  referrerBonusGranted Boolean @default(false)
+  createdAt   DateTime @default(now())
+  paidAt      DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@unique([provider, externalId])
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Промокоды — одноразовая выдача дней по коду.
+// Используется как маркетинговый/онбординговый инструмент:
+//   /promo_create LAUNCH 7 maxUses=100 expires=2026-01-31
+//   юзер: «🎟 Промокод» → LAUNCH → +7 дней.
+// ─────────────────────────────────────────────────────────────
+model PromoCode {
+  id         Int                   @id @default(autoincrement())
+  // Хранится в UPPER-CASE. Юзер может вводить в любом регистре —
+  // нормализуем (.trim().toUpperCase()) при поиске.
+  code       String                @unique
+  // Сколько дней начисляется при активации.
+  freeDays   Int
+  // Сколько раз вообще можно активировать. NULL = unlimited.
+  maxUses    Int?
+  uses       Int                   @default(0)
+  // До какой даты валиден. NULL = бессрочно.
+  expiresAt  DateTime?
+  // Soft-delete: ставится в false через /promo_del. Сами строки
+  // не удаляем, чтобы PromoCodeRedemption.promoCodeId не сломался.
+  active     Boolean               @default(true)
+  createdAt  DateTime              @default(now())
+
+  redemptions PromoCodeRedemption[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// Активация промокода конкретным юзером. @@unique гарантирует на
+// уровне БД, что один юзер не может активировать один и тот же
+// промокод дважды (даже на гонке между двумя одновременными
+// сообщениями — второе упадёт на unique constraint).
+// ─────────────────────────────────────────────────────────────
+model PromoCodeRedemption {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  promoCodeId Int
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+  redeemedAt  DateTime  @default(now())
+  // Дублируем PromoCode.freeDays на момент активации — если потом
+  // админ поменяет промокод (теоретически, мы не даём такой команды,
+  // но на будущее), история начислений останется консистентной.
+  daysGranted Int
+
+  @@unique([userId, promoCodeId])
+  @@index([promoCodeId])
+}

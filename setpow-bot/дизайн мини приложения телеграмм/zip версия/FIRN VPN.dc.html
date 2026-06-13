@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+@keyframes floaty{0%,100%{transform:translateY(-7px) rotate(-1.2deg);}50%{transform:translateY(9px) rotate(1.6deg);}}
+@keyframes scrIn{from{opacity:0;transform:translateY(16px);filter:blur(8px);}to{opacity:1;transform:none;filter:none;}}
+@keyframes subIn{from{opacity:0;transform:translateX(22px);}to{opacity:1;transform:none;}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.6);}}
+@keyframes glowpulse{0%,100%{opacity:.5;transform:scale(.96);}50%{opacity:1;transform:scale(1.05);}}
+@keyframes ringspin{to{transform:rotate(360deg);}}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+*::-webkit-scrollbar{width:0;height:0;}
+</style>
+</helmet>
+<div style="min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 50% 0%,#a9aeb6,#83878f 70%,#6f747c);padding:28px 18px;font-family:'Space Grotesk',system-ui,sans-serif;">
+
+  <!-- PHONE BEZEL -->
+  <div style="position:relative;width:392px;height:850px;border-radius:54px;padding:11px;background:linear-gradient(160deg,#26282c,#0d0e10 60%);box-shadow:0 50px 100px -30px rgba(20,24,32,.75),0 0 0 1px rgba(255,255,255,.06),inset 0 2px 3px rgba(255,255,255,.18),inset 0 -3px 8px rgba(0,0,0,.6);">
+    <div style="position:absolute;left:50%;top:18px;transform:translateX(-50%);width:118px;height:30px;background:#070809;border-radius:16px;z-index:60;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);"></div>
+
+    <!-- SCREEN -->
+    <div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;">
+      <div style="display:contents;--bg:{{ t.bg }};--bg2:{{ t.bg2 }};--ink:{{ t.ink }};--dim:{{ t.dim }};--glass:{{ t.glass }};--glass2:{{ t.glass2 }};--glassbd:{{ t.glassbd }};--glassbds:{{ t.glassbds }};--hud:{{ t.hud }};--shadow:{{ t.shadow }};--glow:{{ t.glow }};--bar:{{ t.bar }};--chip:{{ t.chip }};">
+
+        <!-- BACKGROUND: icy mist -->
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,var(--bg2,#d9dce0),var(--bg,#bcc2cb));z-index:0;"></div>
+        <div style="position:absolute;inset:0;z-index:0;background:radial-gradient(80% 50% at 50% 8%,var(--glow,#eef5ff),transparent 60%),radial-gradient(60% 40% at 88% 96%,rgba(255,255,255,.35),transparent 70%),radial-gradient(50% 40% at 6% 70%,rgba(120,135,160,.18),transparent 70%);opacity:.85;"></div>
+        <div style="position:absolute;inset:0;z-index:0;opacity:.05;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%222%22/></filter><rect width=%22120%22 height=%22120%22 filter=%22url(%23n)%22/></svg>');"></div>
+
+        <!-- STATUS BAR -->
+        <div style="position:relative;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 26px 2px;color:var(--ink,#191d23);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;">
+          <span>9:41</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+            <svg width="16" height="11" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4c2 0 3.9.8 5.3 2.1l1.2-1.3C13 1.6 10.6.7 8 .7S3 1.6 1.5 3.2L2.7 4.5C4.1 3.2 6 2.4 8 2.4z"/><path d="M8 6c1 0 2 .4 2.7 1.1l1.2-1.3C10.8 4.7 9.5 4.1 8 4.1s-2.8.6-3.9 1.7L5.3 7.1C6 6.4 7 6 8 6z"/><circle cx="8" cy="9.6" r="1.7"/></svg>
+            <div style="display:flex;align-items:center;gap:2px;"><div style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;opacity:.85;"><div style="width:72%;height:100%;background:currentColor;border-radius:1px;"></div></div><div style="width:1.6px;height:4px;background:currentColor;border-radius:2px;opacity:.6;"></div></div>
+          </div>
+        </div>
+
+        <!-- TELEGRAM HEADER -->
+        <div style="position:relative;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:8px 22px 10px;color:var(--ink,#191d23);">
+          <div style="display:flex;align-items:center;gap:9px;opacity:.9;">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,#e9f1fb,#9fb2cd);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 6px rgba(80,100,140,.3);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#2a3340"><path d="M12 2l2.5 6.5L21 9l-5 4 1.6 7L12 16.7 6.4 20 8 13 3 9l6.5-.5z"/></svg>
+            </div>
+            <div style="line-height:1.05;">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.5px;">@firn_vpn_bot</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;opacity:.5;letter-spacing:.6px;">mini app</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;opacity:.55;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </div>
+        </div>
+
+        <!-- APP HEADER -->
+        <div style="position:relative;z-index:30;display:flex;align-items:flex-start;justify-content:space-between;padding:6px 24px 0;color:var(--ink,#191d23);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg width="22" height="26" viewBox="0 0 22 26" style="filter:drop-shadow(0 0 6px var(--glow,#eef5ff));"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9fb3cf"/></linearGradient></defs><path d="M11 1l9 6v12l-9 6-9-6V7z" fill="url(#lg)" stroke="rgba(255,255,255,.7)" stroke-width=".7"/><path d="M11 1v24M2 7l9 6 9-6M2 19l9-6 9 6" stroke="rgba(255,255,255,.45)" stroke-width=".6" fill="none"/></svg>
+            <div style="font-size:25px;font-weight:700;letter-spacing:1px;line-height:1;">{{ brandUpper }}</div>
+          </div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.6px;line-height:1.5;opacity:.62;display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
+            <div style="display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#7fe0a6;box-shadow:0 0 8px #7fe0a6;animation:glowpulse 2s ease-in-out infinite;"></span>NODE · DE-1</div>
+            <div>PING 24ms</div>
+          </div>
+        </div>
+
+        <!-- MONO TICKER -->
+        <div style="position:relative;z-index:30;margin:8px 24px 0;height:18px;overflow:hidden;border-top:1px solid var(--glassbds,rgba(255,255,255,.45));border-bottom:1px solid var(--glassbds,rgba(255,255,255,.45));display:flex;align-items:center;">
+          <div style="display:flex;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--ink,#191d23);opacity:.42;animation:ticker 26s linear infinite;">
+            <span style="padding-right:40px;">SECURE TUNNEL // REALITY-TLS // VLESS-XTLS // ENCRYPTED ICE // ZERO LOGS // 2026 //&nbsp;</span>
+            <span style="padding-right:40px;">SECURE TUNNEL // REALITY-TLS // VLESS-XTLS // ENCRYPTED ICE // ZERO LOGS // 2026 //&nbsp;</span>
+          </div>
+        </div>
+
+        <!-- SCROLL AREA -->
+        <div ref="{{ scrollRef }}" style="position:absolute;top:188px;left:0;right:0;bottom:0;z-index:20;overflow-y:auto;overflow-x:hidden;padding:14px 18px 118px;">
+
+          <!-- ============ HOME ============ -->
+          <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="animation:scrIn .45s cubic-bezier(.2,.8,.2,1);">
+
+            <!-- HERO CRYSTAL -->
+            <div onPointerMove="{{ onTilt }}" onPointerLeave="{{ offTilt }}" style="position:relative;height:286px;margin:-4px -4px 4px;display:flex;align-items:center;justify-content:center;touch-action:none;">
+              <canvas ref="{{ canvasRef }}" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;"></canvas>
+              <div style="position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(96,110,135,.22),rgba(96,110,135,.08) 50%,transparent 72%);z-index:0;"></div>
+              <div style="position:absolute;width:150px;height:170px;border-radius:50%;background:radial-gradient(circle,var(--glow,#eef5ff),rgba(200,222,255,.3) 42%,transparent 68%);filter:blur(7px);z-index:1;opacity:.7;animation:glowpulse 5s ease-in-out infinite;"></div>
+
+              <!-- HUD bounding overlay -->
+              <svg viewBox="0 0 260 286" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;color:var(--ink,#191d23);opacity:.5;pointer-events:none;font-family:'JetBrains Mono',monospace;">
+                <g fill="none" stroke="currentColor" stroke-width=".7">
+                  <path d="M86 60 L130 38 L176 64"/>
+                  <path d="M70 150 L130 38 M190 150 L130 38"/>
+                  <path d="M70 150 L98 232 M190 150 L162 232"/>
+                  <path d="M98 232 L130 248 L162 232"/>
+                </g>
+                <g fill="currentColor"><circle cx="130" cy="38" r="1.7"/><circle cx="86" cy="60" r="1.4"/><circle cx="176" cy="64" r="1.4"/><circle cx="70" cy="150" r="1.4"/><circle cx="190" cy="150" r="1.4"/><circle cx="98" cy="232" r="1.4"/><circle cx="162" cy="232" r="1.4"/></g>
+                <g fill="none" stroke="currentColor" stroke-width="1"><path d="M40 30 h12 M40 30 v12"/><path d="M220 30 h-12 M220 30 v12"/><path d="M40 256 h12 M40 256 v-12"/><path d="M220 256 h-12 M220 256 v-12"/></g>
+                <line x1="176" y1="64" x2="206" y2="50" stroke="currentColor" stroke-width=".7"/>
+                <line x1="162" y1="232" x2="196" y2="244" stroke="currentColor" stroke-width=".7"/>
+              </svg>
+
+              <!-- TILT + FLOAT CRYSTAL -->
+              <div ref="{{ tiltRef }}" style="position:relative;z-index:2;transform:perspective(600px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .35s cubic-bezier(.2,.8,.2,1);">
+                <div style="animation:floaty 7s ease-in-out infinite;">
+                  <svg width="150" height="196" viewBox="0 0 200 260" style="filter:drop-shadow(0 0 20px var(--glow,#eef5ff)) drop-shadow(0 16px 26px rgba(40,55,85,.5));">
+                    <defs>
+                      <linearGradient id="i1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d3e0f1"/></linearGradient>
+                      <linearGradient id="i2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9f0f9"/><stop offset="1" stop-color="#aabdd6"/></linearGradient>
+                      <linearGradient id="i3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cedcee"/><stop offset="1" stop-color="#8a9fbd"/></linearGradient>
+                      <linearGradient id="i4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b4c5dd"/><stop offset="1" stop-color="#76889f"/></linearGradient>
+                      <radialGradient id="core" cx="50%" cy="46%" r="42%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+                    </defs>
+                    <g stroke="rgba(255,255,255,.7)" stroke-width=".7" stroke-linejoin="round">
+                      <polygon points="100,8 62,70 100,120" fill="url(#i2)"/>
+                      <polygon points="100,8 140,66 100,120" fill="url(#i1)"/>
+                      <polygon points="62,70 50,150 100,120" fill="url(#i3)"/>
+                      <polygon points="140,66 152,150 100,120" fill="url(#i2)"/>
+                      <polygon points="50,150 78,238 100,120" fill="url(#i4)"/>
+                      <polygon points="152,150 128,236 100,120" fill="url(#i3)"/>
+                      <polygon points="78,238 100,252 100,120" fill="url(#i2)"/>
+                      <polygon points="128,236 100,252 100,120" fill="url(#i1)"/>
+                    </g>
+                    <ellipse cx="100" cy="118" rx="44" ry="52" fill="url(#core)" opacity=".9"/>
+                    <polygon points="100,8 62,70 50,150 78,238 100,252 128,236 152,150 140,66" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- HUD labels -->
+              <div style="position:absolute;left:8px;top:34px;z-index:4;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.5;color:var(--ink,#191d23);opacity:.6;">KEY_NODE_29<br><span style="opacity:.7;">DE · FRANKFURT</span></div>
+              <div style="position:absolute;right:6px;top:42px;z-index:4;text-align:right;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.6;color:var(--ink,#191d23);opacity:.6;">TEMP<br>-18.4<br>-02.7</div>
+              <div style="position:absolute;right:10px;bottom:18px;z-index:4;text-align:right;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.6;color:var(--ink,#191d23);opacity:.6;">STATUS // ACTIVE<br><span style="opacity:.85;">TAP · COPY KEY</span></div>
+            </div>
+
+            <!-- SUBSCRIPTION STATUS -->
+            <div style="position:relative;overflow:hidden;border-radius:26px;padding:18px 20px;margin-bottom:13px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);" style-before="content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:26px 26px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);opacity:.55;pointer-events:none;">
+              <div style="position:relative;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.5;margin-bottom:6px;">SUBSCRIPTION</div>
+                  <div style="display:flex;align-items:center;gap:8px;color:var(--ink,#191d23);">
+                    <span style="font-size:21px;font-weight:700;letter-spacing:.3px;">PRO</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:20px;background:var(--chip,rgba(255,255,255,.4));border:1px solid var(--glassbds,rgba(255,255,255,.45));">∞ трафик</span>
+                  </div>
+                  <div style="font-size:12.5px;color:var(--ink,#191d23);opacity:.6;margin-top:6px;">активна до 14.09.2026 · осталось 93 дня</div>
+                </div>
+                <div style="position:relative;width:62px;height:62px;flex-shrink:0;">
+                  <svg width="62" height="62" viewBox="0 0 62 62" style="transform:rotate(-90deg);">
+                    <circle cx="31" cy="31" r="26" fill="none" stroke="var(--glassbds,rgba(255,255,255,.45))" stroke-width="5"/>
+                    <circle cx="31" cy="31" r="26" fill="none" stroke="url(#i1b)" stroke-width="5" stroke-linecap="round" stroke-dasharray="163" stroke-dashoffset="42" style="filter:drop-shadow(0 0 5px var(--glow,#eef5ff));"/>
+                    <defs><linearGradient id="i1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#a9bdd8"/></linearGradient></defs>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink,#191d23);"><span style="font-size:17px;font-weight:700;line-height:1;">93</span><span style="font-size:8px;opacity:.55;font-family:'JetBrains Mono',monospace;">дня</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KEY CARD -->
+            <div style="position:relative;overflow:hidden;border-radius:26px;padding:18px 20px 20px;margin-bottom:13px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);" style-before="content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:26px 26px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);opacity:.55;pointer-events:none;">
+              <div style="position:relative;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.5;">VLESS · КЛЮЧ ПОДКЛЮЧЕНИЯ</div>
+                <button onClick="{{ toggleReveal }}" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;color:var(--ink,#191d23);opacity:.6;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;padding:0;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  {{ revealLabel }}
+                </button>
+              </div>
+              <div style="position:relative;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.55;word-break:break-all;color:var(--ink,#191d23);background:var(--chip,rgba(255,255,255,.4));border:1px solid var(--glassbds,rgba(255,255,255,.45));border-radius:16px;padding:12px 14px;min-height:64px;">{{ keyDisplay }}</div>
+              <button onClick="{{ copyKey }}" style="margin-top:13px;width:100%;border:none;cursor:pointer;border-radius:18px;padding:15px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#11151b;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(220,232,250,.86));box-shadow:0 10px 28px -8px rgba(150,185,240,.7),inset 0 1px 0 #fff;display:flex;align-items:center;justify-content:center;gap:9px;" style-active="transform:scale(.98);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#11151b" stroke-width="1.9"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+                {{ copyLabel }}
+              </button>
+              <div style="display:flex;gap:9px;margin-top:9px;">
+                <button onClick="{{ regenKey }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:16px;padding:12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;color:var(--ink,#191d23);background:var(--glass2,rgba(255,255,255,.3));border:1px solid var(--glassbds,rgba(255,255,255,.45));" style-active="transform:scale(.98);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 11-2.6-6.4M21 4v5h-5"/></svg>
+                  Сменить
+                </button>
+                <button onClick="{{ toggleQr }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:16px;padding:12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;color:var(--ink,#191d23);background:var(--glass2,rgba(255,255,255,.3));border:1px solid var(--glassbds,rgba(255,255,255,.45));" style-active="transform:scale(.98);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 14v3"/></svg>
+                  QR-код
+                </button>
+              </div>
+              <sc-if value="{{ qrOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--glassbds,rgba(255,255,255,.45));">
+                  <div style="width:142px;height:142px;border-radius:16px;background:#fff;padding:11px;box-shadow:0 8px 22px -10px rgba(40,55,80,.5);">
+                    <div style="width:100%;height:100%;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2229%22 height=%2229%22 shape-rendering=%22crispEdges%22><rect width=%2229%22 height=%2229%22 fill=%22white%22/><path fill=%22black%22 d=%22M0 0h7v7h-7zM2 2h3v3h-3zM8 0h1v1h-1zM10 0h1v1h-1zM12 0h2v1h-2zM15 0h1v3h-1zM17 0h1v1h-1zM22 0h7v7h-7zM24 2h3v3h-3zM9 1h1v2h-1zM11 1h1v1h-1zM13 1h1v2h-1zM18 1h2v1h-2zM8 2h1v1h-1zM12 2h1v1h-1zM19 2h1v2h-1zM10 3h2v1h-2zM16 3h1v1h-1zM8 4h1v3h-1zM11 4h1v1h-1zM13 4h2v1h-2zM17 4h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM4 8h2v1h-2zM10 8h1v1h-1zM14 8h2v1h-2zM18 8h1v1h-1zM20 8h1v1h-1zM23 8h1v1h-1zM26 8h2v1h-2zM1 9h1v2h-1zM3 9h1v1h-1zM9 9h1v1h-1zM12 9h1v2h-1zM16 9h1v1h-1zM21 9h2v1h-2zM25 9h1v1h-1zM5 10h2v1h-2zM10 10h1v1h-1zM14 10h1v2h-1zM17 10h2v1h-2zM24 10h1v1h-1zM27 10h1v1h-1zM0 11h1v1h-1zM4 11h1v1h-1zM8 11h2v1h-2zM16 11h1v1h-1zM20 11h1v2h-1zM23 11h1v1h-1zM26 11h1v1h-1zM2 12h2v1h-2zM6 12h1v1h-1zM11 12h1v1h-1zM18 12h1v1h-1zM22 12h1v1h-1zM25 12h2v1h-2zM0 13h1v1h-1zM9 13h2v1h-2zM13 13h1v1h-1zM15 13h2v1h-2zM19 13h1v1h-1zM24 13h1v1h-1zM8 14h1v1h-1zM10 14h1v2h-1zM12 14h1v1h-1zM14 14h1v1h-1zM17 14h1v2h-1zM21 14h2v1h-2zM26 14h2v1h-2zM0 15h2v1h-2zM3 15h1v1h-1zM5 15h2v1h-2zM9 15h1v1h-1zM13 15h1v2h-1zM16 15h1v1h-1zM19 15h2v1h-2zM24 15h1v1h-1zM2 16h1v1h-1zM4 16h1v1h-1zM7 16h1v1h-1zM11 16h2v1h-2zM15 16h1v1h-1zM18 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM8 17h1v1h-1zM12 17h1v1h-1zM14 17h2v1h-2zM20 17h1v1h-1zM23 17h2v1h-2zM0 18h1v1h-1zM3 18h2v1h-2zM6 18h1v1h-1zM9 18h2v1h-2zM13 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM21 18h1v1h-1zM26 18h1v1h-1zM1 19h1v1h-1zM5 19h1v1h-1zM8 19h1v2h-1zM11 19h1v1h-1zM15 19h2v1h-2zM18 19h1v1h-1zM24 19h2v1h-2zM2 20h2v1h-2zM7 20h1v1h-1zM10 20h1v1h-1zM13 20h2v1h-2zM16 20h1v1h-1zM20 20h1v1h-1zM22 20h1v1h-1zM27 20h1v1h-1zM16 21h1v1h-1zM18 21h2v1h-2zM21 21h1v1h-1zM23 21h1v1h-1zM25 21h1v1h-1zM8 22h1v1h-1zM10 22h2v1h-2zM13 22h1v1h-1zM15 22h1v1h-1zM0 23h7v7h-7zM2 25h3v3h-3zM9 23h2v1h-2zM12 23h1v1h-1zM14 23h1v1h-1zM17 23h1v1h-1zM19 23h2v1h-2zM22 23h1v1h-1zM24 23h1v1h-1zM26 23h2v1h-2zM8 24h1v1h-1zM11 24h1v1h-1zM16 24h1v2h-1zM18 24h1v1h-1zM21 24h1v1h-1zM25 24h1v1h-1zM27 24h1v1h-1zM9 25h2v1h-2zM13 25h2v1h-2zM19 25h1v1h-1zM22 25h2v1h-2zM10 26h1v1h-1zM12 26h1v1h-1zM14 26h1v1h-1zM18 26h2v1h-2zM21 26h1v1h-1zM24 26h1v1h-1zM26 26h2v1h-2zM8 27h1v1h-1zM11 27h2v1h-2zM15 27h1v1h-1zM17 27h1v1h-1zM20 27h1v1h-1zM23 27h1v1h-1zM9 28h1v1h-1zM13 28h1v1h-1zM16 28h2v1h-2zM19 28h1v1h-1zM22 28h2v1h-2zM25 28h2v1h-2z%22/></svg>');background-size:contain;background-repeat:no-repeat;image-rendering:pixelated;"></div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1px;color:var(--ink,#191d23);opacity:.5;margin-top:10px;">SCAN · ИМПОРТ В КЛИЕНТ</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <!-- RENEW -->
+            <button onClick="{{ goRenew }}" style="width:100%;border:none;cursor:pointer;border-radius:22px;padding:17px;margin-bottom:13px;font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:600;color:var(--ink,#191d23);background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);display:flex;align-items:center;justify-content:space-between;" style-active="transform:scale(.99);">
+              <span style="display:flex;align-items:center;gap:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2 6 6 .5-4.5 4 1.5 6-5-3.2L7.5 18.5l1.5-6L4.5 8.5 10.5 8z"/></svg>Продлить подписку</span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.55;">от 149 ₽</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></span>
+            </button>
+
+            <!-- HOW TO -->
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:6px 4px 9px;">КАК ПОДКЛЮЧИТЬСЯ</div>
+            <sc-for list="{{ howSteps }}" as="st" hint-placeholder-count="3">
+              <div style="display:flex;align-items:flex-start;gap:13px;border-radius:20px;padding:14px 16px;margin-bottom:9px;background:var(--glass2,rgba(255,255,255,.3));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glassbds,rgba(255,255,255,.45));">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--ink,#191d23);opacity:.4;line-height:1.1;flex-shrink:0;">{{ st.n }}</div>
+                <div><div style="font-size:14px;font-weight:600;color:var(--ink,#191d23);">{{ st.t }}</div><div style="font-size:12px;color:var(--ink,#191d23);opacity:.55;margin-top:2px;">{{ st.d }}</div></div>
+              </div>
+            </sc-for>
+
+          </div>
+          </sc-if>
+
+          <!-- ============ SUPPORT ============ -->
+          <sc-if value="{{ isSupport }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:scrIn .45s cubic-bezier(.2,.8,.2,1);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--ink,#191d23);opacity:.5;margin:6px 4px 14px;">SUPPORT // ONLINE</div>
+
+            <!-- OPERATOR -->
+            <div style="position:relative;overflow:hidden;border-radius:26px;padding:22px 20px;margin-bottom:13px;text-align:center;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);" style-before="content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:26px 26px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);opacity:.55;pointer-events:none;">
+              <div style="position:relative;width:74px;height:74px;margin:0 auto 14px;">
+                <div style="position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,var(--glow,#eef5ff),transparent 70%);filter:blur(4px);animation:glowpulse 4s ease-in-out infinite;"></div>
+                <div style="position:relative;width:74px;height:74px;border-radius:50%;background:linear-gradient(150deg,#eef4fc,#9db1cd);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 2px rgba(255,255,255,.8),0 8px 20px -8px rgba(70,95,140,.6);">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2a3340" stroke-width="1.6"><path d="M4 12a8 8 0 0116 0v5a2 2 0 01-2 2h-1v-6h3M4 12v5a2 2 0 002 2h1v-6H4"/></svg>
+                </div>
+                <span style="position:absolute;right:2px;bottom:2px;width:15px;height:15px;border-radius:50%;background:#7fe0a6;border:2.5px solid var(--bg2,#d9dce0);box-shadow:0 0 8px #7fe0a6;"></span>
+              </div>
+              <div style="font-size:19px;font-weight:700;color:var(--ink,#191d23);">Поддержка {{ brandUpper }}</div>
+              <div style="font-size:13px;color:var(--ink,#191d23);opacity:.6;margin-top:4px;">Обычно отвечаем за ~5 минут · 24/7</div>
+              <button onClick="{{ openTg }}" style="margin-top:16px;width:100%;border:none;cursor:pointer;border-radius:18px;padding:15px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#11151b;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(220,232,250,.86));box-shadow:0 10px 28px -8px rgba(150,185,240,.7),inset 0 1px 0 #fff;display:flex;align-items:center;justify-content:center;gap:9px;" style-active="transform:scale(.98);">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="#11151b"><path d="M22 3L2 11l6 2.2L18 6l-7.5 9 .2 5 3-3.5L19 21z"/></svg>
+                Написать в Telegram
+              </button>
+            </div>
+
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:14px 4px 9px;">ЧАСТЫЕ ТЕМЫ</div>
+            <sc-for list="{{ supportTopics }}" as="tp" hint-placeholder-count="5">
+              <button onClick="{{ openTg }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;border-radius:18px;padding:15px 17px;margin-bottom:9px;cursor:pointer;text-align:left;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--ink,#191d23);background:var(--glass2,rgba(255,255,255,.3));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glassbds,rgba(255,255,255,.45));" style-active="transform:scale(.99);">
+                <span style="display:flex;align-items:center;gap:11px;"><span style="color:var(--ink,#191d23);opacity:.4;">{{ tp.ic }}</span>{{ tp.t }}</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="opacity:.4;"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+            </sc-for>
+
+            <!-- SYSTEM STATUS -->
+            <div style="display:flex;align-items:center;gap:11px;border-radius:18px;padding:15px 17px;margin-top:5px;background:var(--glass2,rgba(255,255,255,.3));border:1px solid var(--glassbds,rgba(255,255,255,.45));">
+              <span style="width:9px;height:9px;border-radius:50%;background:#7fe0a6;box-shadow:0 0 10px #7fe0a6;animation:glowpulse 2.2s ease-in-out infinite;flex-shrink:0;"></span>
+              <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;color:var(--ink,#191d23);">Все системы работают</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink,#191d23);opacity:.5;margin-top:2px;">12/12 NODES · UPTIME 99.98%</div></div>
+            </div>
+          </div>
+          </sc-if>
+
+          <!-- ============ PROFILE ============ -->
+          <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <!-- MAIN LIST -->
+            <sc-if value="{{ subNone }}" hint-placeholder-val="{{ true }}">
+            <div style="animation:scrIn .45s cubic-bezier(.2,.8,.2,1);">
+              <!-- ACCOUNT -->
+              <div style="position:relative;overflow:hidden;border-radius:26px;padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:15px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);" style-before="content:'';position:absolute;left:0;right:0;top:0;height:50%;border-radius:26px 26px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);opacity:.55;pointer-events:none;">
+                <div style="position:relative;width:56px;height:56px;border-radius:50%;flex-shrink:0;background:linear-gradient(150deg,#eef4fc,#9db1cd);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 2px rgba(255,255,255,.8),0 6px 16px -6px rgba(70,95,140,.5);">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2a3340" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </div>
+                <div style="flex:1;position:relative;">
+                  <div style="font-size:17px;font-weight:700;color:var(--ink,#191d23);">@cryo_user</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink,#191d23);opacity:.5;margin-top:2px;">ID 8 472 119</div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;color:#11151b;background:linear-gradient(180deg,#fff,#cfdcef);box-shadow:0 4px 10px -4px rgba(120,150,200,.6);">PRO</span>
+              </div>
+
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:4px 4px 9px;">АККАУНТ</div>
+              <div style="border-radius:22px;overflow:hidden;margin-bottom:16px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 14px 36px -22px var(--shadow,rgba(70,82,102,.3));">
+                <sc-for list="{{ accountRows }}" as="r" hint-placeholder-count="2">
+                  <button onClick="{{ r.go }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:15px 17px;cursor:pointer;text-align:left;background:none;border:none;border-bottom:1px solid var(--glassbds,rgba(255,255,255,.45));font-family:'Space Grotesk',sans-serif;" style-active="background:var(--glass2,rgba(255,255,255,.3));">
+                    <span style="color:var(--ink,#191d23);opacity:.55;display:flex;">{{ r.ic }}</span>
+                    <span style="flex:1;font-size:14.5px;color:var(--ink,#191d23);">{{ r.t }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink,#191d23);opacity:.5;">{{ r.v }}</span>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink,#191d23)" stroke-width="1.8" stroke-linecap="round" style="opacity:.35;"><path d="M9 6l6 6-6 6"/></svg>
+                  </button>
+                </sc-for>
+              </div>
+
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:4px 4px 9px;">ПОДДЕРЖКА И ИНФО</div>
+              <div style="border-radius:22px;overflow:hidden;margin-bottom:16px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 14px 36px -22px var(--shadow,rgba(70,82,102,.3));">
+                <sc-for list="{{ infoRows }}" as="r" hint-placeholder-count="3">
+                  <button onClick="{{ r.go }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:15px 17px;cursor:pointer;text-align:left;background:none;border:none;border-bottom:1px solid var(--glassbds,rgba(255,255,255,.45));font-family:'Space Grotesk',sans-serif;" style-active="background:var(--glass2,rgba(255,255,255,.3));">
+                    <span style="color:var(--ink,#191d23);opacity:.55;display:flex;">{{ r.ic }}</span>
+                    <span style="flex:1;font-size:14.5px;color:var(--ink,#191d23);">{{ r.t }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink,#191d23);opacity:.5;">{{ r.v }}</span>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink,#191d23)" stroke-width="1.8" stroke-linecap="round" style="opacity:.35;"><path d="M9 6l6 6-6 6"/></svg>
+                  </button>
+                </sc-for>
+              </div>
+
+              <!-- THEME -->
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:4px 4px 9px;">ОФОРМЛЕНИЕ</div>
+              <div style="border-radius:22px;padding:15px 17px;margin-bottom:18px;display:flex;align-items:center;gap:13px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 14px 36px -22px var(--shadow,rgba(70,82,102,.3));">
+                <span style="color:var(--ink,#191d23);opacity:.55;display:flex;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg></span>
+                <span style="flex:1;font-size:14.5px;color:var(--ink,#191d23);">Тема</span>
+                <div style="display:flex;background:var(--chip,rgba(255,255,255,.4));border:1px solid var(--glassbds,rgba(255,255,255,.45));border-radius:14px;padding:3px;gap:2px;">
+                  <button onClick="{{ setLight }}" style="border:none;cursor:pointer;border-radius:11px;padding:7px 13px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;color:{{ lightBtnInk }};background:{{ lightBtnBg }};">Лёд</button>
+                  <button onClick="{{ setDark }}" style="border:none;cursor:pointer;border-radius:11px;padding:7px 13px;font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;color:{{ darkBtnInk }};background:{{ darkBtnBg }};">Ночь</button>
+                </div>
+              </div>
+
+              <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--ink,#191d23);opacity:.35;padding-bottom:8px;">{{ brandUpper }} v2.4.0 · build 2026.06</div>
+            </div>
+            </sc-if>
+
+            <!-- SUBVIEW -->
+            <sc-if value="{{ subAny }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:subIn .35s cubic-bezier(.2,.8,.2,1);">
+              <button onClick="{{ backSub }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--ink,#191d23);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:4px 0 14px;opacity:.8;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>{{ subTitle }}
+              </button>
+
+              <!-- PARTNER -->
+              <sc-if value="{{ isPartner }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="position:relative;overflow:hidden;border-radius:26px;padding:20px;margin-bottom:13px;text-align:center;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.5;">ВЫ ЗАРАБОТАЛИ</div>
+                  <div style="font-size:38px;font-weight:700;color:var(--ink,#191d23);margin:6px 0 2px;letter-spacing:-.5px;">1 240 ₽</div>
+                  <div style="font-size:12.5px;color:var(--ink,#191d23);opacity:.55;">за 12 приглашённых друзей · 30% с оплат</div>
+                </div>
+                <div style="display:flex;gap:9px;margin-bottom:13px;">
+                  <div style="flex:1;border-radius:18px;padding:15px;text-align:center;background:var(--glass2,rgba(255,255,255,.3));border:1px solid var(--glassbds,rgba(255,255,255,.45));"><div style="font-size:22px;font-weight:700;color:var(--ink,#191d23);">12</div><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink,#191d23);opacity:.5;margin-top:2px;">РЕФЕРАЛОВ</div></div>
+                  <div style="flex:1;border-radius:18px;padding:15px;text-align:center;background:var(--glass2,rgba(255,255,255,.3));border:1px solid var(--glassbds,rgba(255,255,255,.45));"><div style="font-size:22px;font-weight:700;color:var(--ink,#191d23);">30%</div><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink,#191d23);opacity:.5;margin-top:2px;">КОМИССИЯ</div></div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.45;margin:4px 4px 8px;">ВАША ССЫЛКА</div>
+                <div style="display:flex;align-items:center;gap:10px;border-radius:16px;padding:13px 15px;background:var(--chip,rgba(255,255,255,.4));border:1px solid var(--glassbds,rgba(255,255,255,.45));">
+                  <span style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink,#191d23);word-break:break-all;">t.me/firn_vpn_bot?ref=8472119</span>
+                  <button onClick="{{ copyRef }}" style="border:none;cursor:pointer;background:none;color:var(--ink,#191d23);opacity:.7;display:flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;text-align:center;color:var(--ink,#191d23);opacity:.5;margin-top:11px;height:12px;">{{ refHint }}</div>
+              </div>
+              </sc-if>
+
+              <!-- PROMO -->
+              <sc-if value="{{ isPromo }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="position:relative;overflow:hidden;border-radius:26px;padding:20px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 16px 40px -22px var(--shadow,rgba(70,82,102,.3)),inset 0 1px 0 rgba(255,255,255,.5);">
+                  <div style="font-size:15px;font-weight:600;color:var(--ink,#191d23);">Активировать промокод</div>
+                  <div style="font-size:12.5px;color:var(--ink,#191d23);opacity:.55;margin-top:4px;margin-bottom:14px;">Бонусные дни или скидка на продление</div>
+                  <input value="{{ promo }}" onInput="{{ onPromo }}" placeholder="НАПРИМЕР: ICE2026" style="width:100%;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--ink,#191d23);background:var(--chip,rgba(255,255,255,.4));border:1px solid var(--glassbds,rgba(255,255,255,.45));border-radius:16px;padding:15px;outline:none;text-align:center;">
+                  <button onClick="{{ applyPromo }}" style="margin-top:11px;width:100%;border:none;cursor:pointer;border-radius:16px;padding:15px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:#11151b;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(220,232,250,.86));box-shadow:0 10px 28px -8px rgba(150,185,240,.7),inset 0 1px 0 #fff;" style-active="transform:scale(.98);">Применить</button>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;color:var(--ink,#191d23);opacity:.6;margin-top:12px;height:14px;">{{ promoHint }}</div>
+                </div>
+              </div>
+              </sc-if>
+
+              <!-- FAQ -->
+              <sc-if value="{{ isFaq }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <sc-for list="{{ faqItems }}" as="f" hint-placeholder-count="5">
+                  <div style="border-radius:18px;margin-bottom:9px;overflow:hidden;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--glassbd,rgba(255,255,255,.75));">
+                    <button onClick="{{ f.toggle }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;cursor:pointer;text-align:left;background:none;border:none;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;color:var(--ink,#191d23);">
+                      {{ f.q }}
+                      <span style="color:var(--ink,#191d23);opacity:.5;flex-shrink:0;transform:{{ f.rot }};transition:transform .25s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+                    </button>
+                    <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding:0 17px 16px;font-size:13px;line-height:1.55;color:var(--ink,#191d23);opacity:.65;">{{ f.a }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              </sc-if>
+
+              <!-- PRIVACY -->
+              <sc-if value="{{ isPrivacy }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:22px;padding:20px;background:var(--glass,rgba(255,255,255,.46));backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 14px 36px -22px var(--shadow,rgba(70,82,102,.3));">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;color:var(--ink,#191d23);opacity:.5;margin-bottom:12px;">ZERO-LOGS POLICY</div>
+                <p style="font-size:13.5px;line-height:1.65;color:var(--ink,#191d23);opacity:.72;margin:0 0 12px;">Мы не ведём логи вашего трафика, посещённых сайтов, DNS-запросов и IP-адресов. Сервис хранит только данные, необходимые для работы подписки: идентификатор Telegram и срок действия ключа.</p>
+                <p style="font-size:13.5px;line-height:1.65;color:var(--ink,#191d23);opacity:.72;margin:0 0 12px;">Платёжные данные обрабатываются провайдером оплаты и не сохраняются на наших серверах. Ключ можно сменить в любой момент — старый мгновенно отзывается.</p>
+                <p style="font-size:13.5px;line-height:1.65;color:var(--ink,#191d23);opacity:.72;margin:0;">Используя {{ brandUpper }}, вы соглашаетесь с условиями использования и политикой конфиденциальности.</p>
+              </div>
+              </sc-if>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+        </div>
+
+        <!-- BOTTOM TAB BAR -->
+        <div style="position:absolute;left:16px;right:16px;bottom:18px;z-index:40;display:flex;padding:7px;border-radius:26px;background:var(--bar,rgba(255,255,255,.55));backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);border:1px solid var(--glassbd,rgba(255,255,255,.75));box-shadow:0 18px 44px -16px var(--shadow,rgba(70,82,102,.45)),inset 0 1px 0 rgba(255,255,255,.55);">
+          <button onClick="{{ goHome }}" style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border:none;cursor:pointer;background:{{ homeBg }};border-radius:19px;color:{{ homeInk }};transition:all .25s;" style-active="transform:scale(.95);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8.5" cy="8.5" r="4.5"/><path d="M11.5 11.5L20 20M16 16l3-1M14 14l2 2"/></svg>
+            <span style="font-size:10.5px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;">Ключ</span>
+          </button>
+          <button onClick="{{ goSupport }}" style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border:none;cursor:pointer;background:{{ supBg }};border-radius:19px;color:{{ supInk }};transition:all .25s;" style-active="transform:scale(.95);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.38 8.38 0 01-9 8.3 8.5 8.5 0 01-3.8-.9L3 20l1.1-4.2A8.38 8.38 0 0112 3.5a8.5 8.5 0 019 8z"/></svg>
+            <span style="font-size:10.5px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;">Поддержка</span>
+          </button>
+          <button onClick="{{ goProfile }}" style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border:none;cursor:pointer;background:{{ profBg }};border-radius:19px;color:{{ profInk }};transition:all .25s;" style-active="transform:scale(.95);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>
+            <span style="font-size:10.5px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;">Профиль</span>
+          </button>
+        </div>
+
+        <!-- COPY TOAST -->
+        <sc-if value="{{ copied }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:18px;background:rgba(20,26,34,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#eef5ff;font-size:13px;font-weight:600;box-shadow:0 14px 34px -12px rgba(0,0,0,.6);animation:scrIn .3s ease both;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7fe0a6" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>
+            Скопировано в буфер
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:470,&quot;height&quot;:920},&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FIRN&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initialTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    theme: 'light',
+    revealed: false,
+    copied: false,
+    qrOpen: false,
+    sub: null,
+    faqOpen: 0,
+    promo: '',
+    promoMsg: '',
+    refMsg: '',
+    keyId: '2f9c4e7a-1b3d-4f8a-9c2e-7d6b5a4f3e2d',
+  };
+
+  componentDidMount() {
+    if (this.props.initialTheme === 'dark' || this.props.initialTheme === 'light') {
+      this.setState({ theme: this.props.initialTheme });
+    }
+    this._startParticles();
+  }
+  componentWillUnmount() {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    window.removeEventListener('resize', this._onResize);
+  }
+
+  _startParticles() {
+    const cv = this._canvas;
+    if (!cv) { setTimeout(() => this._startParticles(), 120); return; }
+    const ctx = cv.getContext('2d');
+    let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const resize = () => {
+      const r = cv.getBoundingClientRect();
+      W = r.width; H = r.height;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    this._onResize = resize;
+    window.addEventListener('resize', resize);
+    resize();
+    const N = 90;
+    const ps = [];
+    for (let i = 0; i < N; i++) {
+      ps.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.6 + 0.4,
+        sp: Math.random() * 0.25 + 0.06,
+        ph: Math.random() * Math.PI * 2,
+        am: Math.random() * 0.5 + 0.2,
+        o: Math.random() * 0.5 + 0.15,
+      });
+    }
+    const draw = () => {
+      if (!cv.isConnected) return;
+      if (W === 0) resize();
+      ctx.clearRect(0, 0, W, H);
+      const dark = this.state.theme === 'dark';
+      const cx = W / 2, cy = H / 2;
+      for (const p of ps) {
+        p.y -= p.sp;
+        p.ph += 0.01;
+        const x = p.x + Math.sin(p.ph) * p.am;
+        if (p.y < -4) { p.y = H + 4; p.x = Math.random() * W; }
+        const dx = x - cx, dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const glow = Math.max(0, 1 - dist / 150);
+        ctx.beginPath();
+        ctx.arc(x, p.y, p.r + glow * 0.8, 0, Math.PI * 2);
+        const a = p.o * (0.5 + glow * 0.7);
+        ctx.fillStyle = dark ? 'rgba(220,235,255,' + a + ')' : 'rgba(255,255,255,' + (a * 0.95) + ')';
+        ctx.fill();
+      }
+      this._raf = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  _tokens() {
+    const light = {
+      bg: '#bcc2cb', bg2: '#dadde1', ink: '#191d23', dim: '#5b626d',
+      glass: 'rgba(255,255,255,0.46)', glass2: 'rgba(255,255,255,0.30)',
+      glassbd: 'rgba(255,255,255,0.78)', glassbds: 'rgba(255,255,255,0.5)',
+      hud: 'rgba(40,48,58,0.6)', shadow: 'rgba(70,82,102,0.32)',
+      glow: '#eef5ff', bar: 'rgba(255,255,255,0.5)', chip: 'rgba(255,255,255,0.42)',
+    };
+    const dark = {
+      bg: '#0c0f13', bg2: '#1a2027', ink: '#eef2f8', dim: '#929aa8',
+      glass: 'rgba(255,255,255,0.07)', glass2: 'rgba(255,255,255,0.04)',
+      glassbd: 'rgba(255,255,255,0.16)', glassbds: 'rgba(255,255,255,0.09)',
+      hud: 'rgba(210,222,240,0.5)', shadow: 'rgba(0,0,0,0.6)',
+      glow: '#bcd6ff', bar: 'rgba(26,32,40,0.62)', chip: 'rgba(255,255,255,0.07)',
+    };
+    return this.state.theme === 'dark' ? dark : light;
+  }
+
+  _icon(kind) {
+    const s = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7 };
+    const paths = {
+      gift: [['path', { d: 'M20 12v8H4v-8M2 7h20v5H2zM12 22V7M12 7C9 7 7 5 8 3.5 9 2 12 4 12 7zM12 7c3 0 5-2 4-3.5C15 2 12 4 12 7z' }]],
+      tag: [['path', { d: 'M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7-7a2 2 0 01-.6-1.4V5a2 2 0 012-2h6.8a2 2 0 011.4.6l7.4 7.4a2 2 0 010 2.4z' }], ['circle', { cx: 7.5, cy: 7.5, r: 1.3, fill: 'currentColor', stroke: 'none' }]],
+      help: [['circle', { cx: 12, cy: 12, r: 9 }], ['path', { d: 'M9.5 9a2.5 2.5 0 115 .5c0 1.5-2.5 2-2.5 3.5' }], ['circle', { cx: 12, cy: 17, r: 0.6, fill: 'currentColor', stroke: 'none' }]],
+      tg: [['path', { d: 'M22 3L2 11l6 2.2L18 6l-7.5 9 .2 5 3-3.5L19 21z' }]],
+      doc: [['path', { d: 'M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M9 13h6M9 17h6' }]],
+    };
+    const arr = paths[kind] || [];
+    return React.createElement('svg', s, arr.map((p, i) => React.createElement(p[0], Object.assign({ key: i }, p[1]))));
+  }
+
+  renderVals() {
+    const t = this._tokens();
+    const s = this.state;
+    const sel = (on) => on ? '#11151b' : t.ink;
+    const selBg = (on) => on ? 'linear-gradient(180deg,#fff,#cfdcef)' : 'transparent';
+    const tabBg = (on) => on ? 'var(--glass2,rgba(255,255,255,.35))' : 'transparent';
+    const tabInk = (on) => on ? t.ink : t.dim;
+
+    const keyFull = 'vless://' + s.keyId + '@de1.firn.vpn:443?type=tcp&security=reality&pbk=Xj9...k2&sni=cloudflare.com#FIRN-DE-1';
+    const masked = '••••••••-••••-••••-••••-••••••••••••\n••••••••••••••••••••••••••••••••••••';
+
+    const subTitles = { partner: 'Партнёрская программа', promo: 'Промокоды', faq: 'Вопрос–ответ', privacy: 'Конфиденциальность' };
+
+    const faqData = [
+      { q: 'Не работает ключ — что делать?', a: 'Убедитесь, что подписка активна и вы импортировали актуальный ключ. Если ключ менялся — старый отзывается. Скопируйте ключ заново на главном экране.' },
+      { q: 'Какой клиент установить?', a: 'iOS: v2RayTun или Streisand. Android: v2RayTun или Hiddify. Windows: Hiddify или Nekoray. Вставьте ключ через «Импорт из буфера».' },
+      { q: 'Сколько устройств можно подключить?', a: 'Тариф PRO допускает одновременное подключение до 5 устройств с одним ключом.' },
+      { q: 'Как продлить подписку?', a: 'На главном экране нажмите «Продлить подписку» и выберите срок. Дни добавятся к текущей подписке без смены ключа.' },
+      { q: 'Вы храните логи?', a: 'Нет. Мы не ведём логи трафика, DNS и IP. Подробнее — в разделе «Конфиденциальность».' },
+    ];
+    const faqItems = faqData.map((f, i) => ({
+      q: f.q, a: f.a,
+      open: s.faqOpen === i,
+      rot: s.faqOpen === i ? 'rotate(180deg)' : 'rotate(0deg)',
+      toggle: () => this.setState({ faqOpen: s.faqOpen === i ? -1 : i }),
+    }));
+
+    const topicIcons = ['⛔', '₽', '⚡', '⇄', '↩'];
+    const supportTopics = ['Не работает ключ', 'Оплата и чек', 'Низкая скорость', 'Сменить устройство', 'Возврат средств']
+      .map((t2, i) => ({ t: t2, ic: topicIcons[i] }));
+
+    const howSteps = [
+      { n: '01', t: 'Установите клиент', d: 'v2RayTun · Hiddify · Streisand' },
+      { n: '02', t: 'Скопируйте ключ', d: 'Одно нажатие — ключ в буфере' },
+      { n: '03', t: 'Импорт и подключение', d: '«Добавить из буфера» в клиенте' },
+    ];
+
+    const accountRows = [
+      { ic: this._icon('gift'), t: 'Партнёрская программа', v: '+1 240 ₽', go: () => { this._top(); this.setState({ sub: 'partner' }); } },
+      { ic: this._icon('tag'), t: 'Промокоды', v: 'ввести', go: () => { this._top(); this.setState({ sub: 'promo' }); } },
+    ];
+    const infoRows = [
+      { ic: this._icon('help'), t: 'Вопрос–ответ', v: '', go: () => { this._top(); this.setState({ sub: 'faq' }); } },
+      { ic: this._icon('tg'), t: 'Telegram-канал', v: '@firn_news', go: () => this._openTg() },
+      { ic: this._icon('doc'), t: 'Конфиденциальность', v: '', go: () => { this._top(); this.setState({ sub: 'privacy' }); } },
+    ];
+
+    return {
+      t, brandUpper: (this.props.brand || 'FIRN').toUpperCase(),
+      isHome: s.screen === 'home', isSupport: s.screen === 'support', isProfile: s.screen === 'profile',
+      scrollRef: (el) => { this._scroll = el; },
+      goHome: () => { this._top(); this.setState({ screen: 'home' }); },
+      goSupport: () => { this._top(); this.setState({ screen: 'support' }); },
+      goProfile: () => { this._top(); this.setState({ screen: 'profile', sub: null }); },
+      goRenew: () => { this._toast('Открываем оплату…'); },
+
+      homeBg: tabBg(s.screen === 'home'), homeInk: tabInk(s.screen === 'home'),
+      supBg: tabBg(s.screen === 'support'), supInk: tabInk(s.screen === 'support'),
+      profBg: tabBg(s.screen === 'profile'), profInk: tabInk(s.screen === 'profile'),
+
+      // hero tilt
+      tiltRef: (el) => { this._tilt = el; },
+      canvasRef: (el) => { this._canvas = el; },
+      onTilt: (e) => {
+        if (!this._tilt) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width * 2 - 1;
+        const py = (e.clientY - r.top) / r.height * 2 - 1;
+        this._tilt.style.setProperty('--ry', (px * 14).toFixed(1) + 'deg');
+        this._tilt.style.setProperty('--rx', (-py * 10).toFixed(1) + 'deg');
+      },
+      offTilt: () => { if (this._tilt) { this._tilt.style.setProperty('--ry', '0deg'); this._tilt.style.setProperty('--rx', '0deg'); } },
+
+      // key card
+      revealed: s.revealed,
+      keyDisplay: s.revealed ? keyFull : masked,
+      revealLabel: s.revealed ? 'Скрыть' : 'Показать',
+      toggleReveal: () => this.setState({ revealed: !s.revealed }),
+      copyLabel: s.copied ? 'Скопировано' : 'Скопировать ключ',
+      copied: s.copied,
+      copyKey: () => { this._copy(keyFull); },
+      regenKey: () => {
+        const hex = () => Math.floor(Math.random() * 16).toString(16);
+        const seg = (n) => Array.from({ length: n }, hex).join('');
+        const id = seg(8) + '-' + seg(4) + '-4' + seg(3) + '-' + seg(4) + '-' + seg(12);
+        this.setState({ keyId: id, revealed: true });
+        this._toast('Ключ обновлён · старый отозван');
+      },
+      qrOpen: s.qrOpen,
+      toggleQr: () => this.setState({ qrOpen: !s.qrOpen }),
+
+      howSteps,
+
+      // support
+      supportTopics,
+      openTg: () => this._openTg(),
+
+      // profile
+      subNone: s.sub === null,
+      subAny: s.sub !== null,
+      subTitle: subTitles[s.sub] || '',
+      isPartner: s.sub === 'partner', isPromo: s.sub === 'promo', isFaq: s.sub === 'faq', isPrivacy: s.sub === 'privacy',
+      backSub: () => { this._top(); this.setState({ sub: null }); },
+      accountRows, infoRows, faqItems,
+
+      // theme toggle
+      setLight: () => this.setState({ theme: 'light' }),
+      setDark: () => this.setState({ theme: 'dark' }),
+      lightBtnInk: sel(s.theme === 'light'), lightBtnBg: selBg(s.theme === 'light'),
+      darkBtnInk: sel(s.theme === 'dark'), darkBtnBg: selBg(s.theme === 'dark'),
+
+      // promo / ref
+      promo: s.promo,
+      onPromo: (e) => this.setState({ promo: e.target.value }),
+      applyPromo: () => {
+        const code = (s.promo || '').trim().toUpperCase();
+        if (!code) { this.setState({ promoMsg: 'Введите код' }); return; }
+        if (code === 'ICE2026' || code === 'FIRN') this.setState({ promoMsg: '✓ +14 дней начислено' });
+        else this.setState({ promoMsg: 'Код недействителен' });
+      },
+      promoHint: s.promoMsg,
+      copyRef: () => { this._copy('https://t.me/firn_vpn_bot?ref=8472119'); this.setState({ refMsg: '✓ Ссылка скопирована' }); setTimeout(() => this.setState({ refMsg: '' }), 1800); },
+      refHint: s.refMsg,
+    };
+  }
+
+  _top() { if (this._scroll) this._scroll.scrollTop = 0; }
+  _copy(text) {
+    try {
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+    } catch (e) {}
+    this._toast();
+  }
+  _toast(msg) {
+    if (msg) { /* could store msg */ }
+    this.setState({ copied: true });
+    clearTimeout(this._tt);
+    this._tt = setTimeout(() => this.setState({ copied: false }), 1700);
+  }
+  _openTg() { this._toast('Открываем Telegram…'); }
+}
+</script>
+</body>
+</html>

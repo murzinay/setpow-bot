@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Prisma local data
+prisma/*.db
+prisma/*.db-journal
+prisma/migrations/dev.db*
+
+# Local DB backup snapshots (synced to TG admin chat instead).
+/backups

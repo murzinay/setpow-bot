@@ -1,0 +1,38 @@
+/*
+ * Глобальный сброс + пред-mount фон. Вся темизация и компоненты живут в
+ * App.css на .cx[data-theme]; здесь — только базовый ресет и нейтральный
+ * фон, чтобы до монтирования React не мигал белый экран.
+ */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  /* нейтральный тёмный фон по умолчанию (тема по умолчанию — dark) */
+  background: #0c0f13;
+  color: #eef2f8;
+  font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Запрещаем pull-to-refresh внутри webview — Telegram перехватывает его. */
+  overscroll-behavior-y: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Скрываем скроллбары — в дизайне их нет. */
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
